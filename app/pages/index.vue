@@ -77,8 +77,15 @@ onMounted(() =>
 );
 
 onMounted(async () => {
-  const hasImage = await getClipboardImage();
-  if (hasImage) isCreatingNewCanvas.value = true;
+  const intervalId = setInterval(async () => {
+    try {
+      const hasImage = await getClipboardImage();
+      if (hasImage) isCreatingNewCanvas.value = true;
+      clearInterval(intervalId);
+    } catch (error) {
+      console.error(error);
+    }
+  }, 100);
 });
 watch(isCreatingNewCanvas, (val) => {
   isInModiferBar.value = val;
