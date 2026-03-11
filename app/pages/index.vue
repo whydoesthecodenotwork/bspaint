@@ -33,11 +33,11 @@
 
           <div class="mt-6 flex grow items-center justify-center gap-2">
             <label for="width" class="shrink-0 text-sm font-medium">Width (px)</label>
-            <input id="width" class="du-input du-input-sm grow dark:text-neutral-200" type="number" min="1" max="9999" v-model="width" />
+            <input id="width" class="du-input du-input-sm grow dark:text-neutral-200" type="number" min="1" max="9999" v-model="width" @keydown.stop />
           </div>
           <div class="mt-2 flex grow items-center justify-center gap-2">
             <label for="height" class="shrink-0 text-sm font-medium">Height (px)</label>
-            <input id="height" class="du-input du-input-sm grow dark:text-neutral-200" type="number" min="1" max="9999" v-model="height" />
+            <input id="height" class="du-input du-input-sm grow dark:text-neutral-200" type="number" min="1" max="9999" v-model="height" @keydown.stop />
           </div>
 
           <div class="mt-6 flex w-full items-center justify-between gap-2">
