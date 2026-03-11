@@ -114,6 +114,8 @@ watch(resetEvent, async (val) => {
   history.value = [];
   historyIndex.value = -1;
 
+  // don't persist that...
+  stampSelection();
   currentTool.value = "brush";
   canvasScale.value = 1;
 
