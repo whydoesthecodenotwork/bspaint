@@ -15,7 +15,7 @@ html {
 
 button,
 div[role="button"] {
-  @apply cursor-pointer;
+  @apply cursor-pointer focus:outline-none;
 }
 
 .hide-scrollbar {
