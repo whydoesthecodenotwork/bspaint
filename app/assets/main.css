@@ -10,7 +10,7 @@
 
 html {
   @apply overflow-scroll bg-sky-100 text-black;
-  scrollbar-width: thin;
+  scrollbar-width: none;
 }
 
 button,

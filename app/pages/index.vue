@@ -3,6 +3,19 @@
     <Teleport to="body">
       <Toolbar class="fixed top-0 z-100" />
 
+      <div class="fixed top-1/2 right-0 z-100 flex -translate-y-1/2 flex-col items-end justify-center" :class="{ 'pointer-events-none': isTransparentUI }">
+        <button
+          class="du-swap du-swap-rotate du-tooltip-left du-tooltip rounded-tl-2xl bg-white/75 px-2 transition-opacity duration-500"
+          :class="{ 'pointer-events-none opacity-25': isTransparentUI, 'du-swap-active rounded-l-2xl!': !showLayerPanel }"
+          :data-tip="`${showLayerPanel ? 'Hide' : 'Show'} layers (L)`"
+          @click="showLayerPanel = !showLayerPanel"
+        >
+          <img class="du-swap-on size-10" src="/icons/return-left.svg" aria-hidden="true" draggable="false" />
+          <img class="du-swap-off size-10" src="/icons/return-right.svg" aria-hidden="true" draggable="false" />
+        </button>
+        <Layers :class="{ 'pointer-events-none opacity-0': !showLayerPanel }" />
+      </div>
+
       <div class="fixed bottom-0 left-0 z-100 flex items-center justify-center gap-4">
         <button
           class="rounded-tr-xl bg-red-200/75 px-6 py-2 font-bold transition select-none hover:bg-red-200"
@@ -56,7 +69,7 @@
 
 <script setup lang="ts">
 const userStore = useUserStore();
-const { canvasSize, currentTool, layers, layerIndex, resetEvent, isInModiferBar, isTransparentUI } = storeToRefs(userStore);
+const { canvasSize, currentTool, layers, showLayerPanel, resetEvent, isTransparentUI } = storeToRefs(userStore);
 
 const isCreatingNewCanvas = ref(true);
 const width = ref(500);
@@ -72,29 +85,14 @@ onMounted(() =>
   )
 );
 
-onMounted(() => {
-  window.addEventListener("keydown", createViaPaste);
-});
-onBeforeUnmount(() => {
-  window.removeEventListener("keydown", createViaPaste);
-});
-
-async function createViaPaste(e: KeyboardEvent) {
-  console.log(userStore.history.length);
-  if (!isCreatingNewCanvas.value) return;
-
-  console.log("creating via paste");
-
-  if ((e.ctrlKey || e.metaKey) && e.key == "v") {
+onMounted(async () => {
+  try {
     const clipboard = await navigator.clipboard.read();
-    if (!clipboard.length) return false;
-    userStore.lastPastedImage = undefined;
+    if (!clipboard.length) return;
 
     for (const item of clipboard) {
       if (!item.types.includes("image/png")) continue;
 
-      userStore.lastPastedImage = item;
-      console.log(userStore.lastPastedImage);
       const data = await item.getType("image/png");
       const image = new Image();
       image.src = URL.createObjectURL(data);
@@ -102,13 +100,34 @@ async function createViaPaste(e: KeyboardEvent) {
 
       width.value = image.width;
       height.value = image.height;
-      console.log(`got clipboard image with ${image.width}x${image.height}`);
-      createNew(true);
-
-      return true;
     }
-    console.log(`no clipboard :((`);
-    return false;
+  } catch (error) {}
+});
+
+onMounted(() => window.addEventListener("keydown", createViaPaste));
+onBeforeUnmount(() => window.removeEventListener("keydown", createViaPaste));
+async function createViaPaste(e: KeyboardEvent) {
+  if (!isCreatingNewCanvas.value) return;
+
+  if ((e.ctrlKey || e.metaKey) && e.key == "v") {
+    const clipboard = await navigator.clipboard.read();
+    if (!clipboard.length) return;
+    userStore.lastPastedImage = undefined;
+
+    for (const item of clipboard) {
+      if (!item.types.includes("image/png")) continue;
+
+      userStore.lastPastedImage = item;
+      const data = await item.getType("image/png");
+      const image = new Image();
+      image.src = URL.createObjectURL(data);
+      await new Promise((resolve) => (image.onload = resolve));
+
+      width.value = image.width;
+      height.value = image.height;
+      createNew(true);
+      return;
+    }
   }
 }
 

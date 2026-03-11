@@ -66,7 +66,7 @@
 
 <script setup lang="ts">
 const userStore = useUserStore();
-const { currentColor, canvasSize, currentTool, tools, isDrawing, history, historyIndex, layers, layerIndex, undoEvent, redoEvent, resetEvent, isInModiferBar } = storeToRefs(userStore);
+const { currentColor, canvasSize, currentTool, tools, isDrawing, history, historyIndex, layers, layerIndex, showLayerPanel, undoEvent, redoEvent, resetEvent, isInModiferBar } = storeToRefs(userStore);
 
 const outer = useTemplateRef("outer");
 const canvas = useTemplateRef("canvas");
@@ -135,9 +135,7 @@ watch(resetEvent, async (val) => {
   await nextTick();
   resetEvent.value = false;
 
-  console.log("yo what's up");
   if (userStore.lastPastedImage) {
-    console.log("yo what's up 2");
     const data = await userStore.lastPastedImage.getType("image/png");
     userStore.lastPastedImage = undefined;
     if (!data) return;
@@ -199,7 +197,6 @@ watch(
 function changeLayer(newIndex: number) {
   if (!canvas.value || !context.value) return;
 
-  console.log("a");
   const image = new Image();
   const newLayerDataUrl = layers.value[newIndex]?.dataUrl;
 
@@ -223,7 +220,6 @@ function saveHistory() {
   historyIndex.value++;
 
   layers.value[layerIndex.value]!.dataUrl = dataUrl;
-  console.log("c");
 }
 
 function restoreHistoryState() {
@@ -243,7 +239,6 @@ function restoreHistoryState() {
     context.value.restore();
   };
 
-  console.log(layers.value);
   layers.value[layer]!.dataUrl = dataUrl;
 }
 
@@ -273,6 +268,11 @@ watch(redoEvent, async (newVal) => {
 async function handleKeybinds(event: KeyboardEvent) {
   if (!canvas.value) return;
   if (isInModiferBar.value) return;
+
+  if (!tools.value.text.isTyping && event.key === "l") {
+    showLayerPanel.value = !showLayerPanel.value;
+    return event.preventDefault();
+  }
 
   if (currentTool.value === "text") {
     if (event.key === "Escape") {
@@ -610,7 +610,6 @@ function stampSelection(stampImage = true) {
       context.value.translate(translateX, translateY);
       context.value.rotate(tool.rotationAngle);
       context.value.drawImage(tool.selectionCanvas, -width / 2, -height / 2, width, height);
-      console.log("b");
     }
 
     context.value.restore();

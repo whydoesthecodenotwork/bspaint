@@ -23,6 +23,7 @@ export const useUserStore = defineStore("userStore", () => {
     }
   ]);
   const layerIndex = ref(0);
+  const showLayerPanel = ref(true);
 
   const tools = reactive({
     select: {
@@ -92,6 +93,7 @@ export const useUserStore = defineStore("userStore", () => {
     historyIndex,
     layers,
     layerIndex,
+    showLayerPanel,
     undoEvent,
     redoEvent,
     resetEvent,

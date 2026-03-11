@@ -36,15 +36,6 @@
         Color 2
       </label>
     </div>
-
-    <div>
-      <details class="dropdown rounded-md border bg-neutral-50 p-4 hover:bg-white" @toggle="layerToggle" ref="layers" @mousedown.stop>
-        <summary class="btn">layers</summary>
-        <div class="dropdown-content">
-          <Layers class="absolute -translate-x-4 translate-y-5" />
-        </div>
-      </details>
-    </div>
   </div>
 </template>
 

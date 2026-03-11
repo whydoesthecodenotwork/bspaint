@@ -1,6 +1,6 @@
 <template>
   <div
-    class="hide-scrollbar flex w-80 cursor-auto flex-col-reverse items-center justify-start gap-2 overflow-y-scroll bg-white/75 p-4 transition-opacity duration-500 select-none *:select-none"
+    class="hide-scrollbar flex max-h-[60svh] w-80 cursor-auto flex-col-reverse items-center justify-start gap-2 overflow-y-scroll rounded-l-2xl bg-white/75 p-4 transition-opacity duration-500 select-none *:select-none"
     :class="{ 'pointer-events-none opacity-25': isTransparentUI }"
   >
     <button
@@ -38,7 +38,7 @@
       </button>
     </div>
 
-    <div class="flex w-full items-center justify-between rounded-xl bg-neutral-200/75 px-3 py-6" v-if="currentLayer">
+    <div class="sticky top-0 flex w-full items-center justify-between rounded-xl bg-neutral-200/75 px-3 py-6 backdrop-blur-xs" v-if="currentLayer">
       <div class="flex grow px-6">
         <div class="du-tooltip du-tooltip-bottom flex flex-col items-start justify-center gap-1" :data-tip="currentLayer.opacity + '%'">
           <div>
@@ -121,7 +121,6 @@ function createNewLayer() {
 }
 
 function deleteLayer() {
-  console.log(layers.value);
   if (layers.value.length <= 1) return;
   layers.value.splice(layerIndex.value, 1);
   layerIndex.value--;
