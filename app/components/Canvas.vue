@@ -9,6 +9,7 @@
     <img
       class="canvas pointer-events-none absolute top-0 left-0 select-none"
       v-for="layer in layers.slice(0, layerIndex)"
+      :key="layer.dataUrl"
       :style="{ transform: `scale(${canvasScale})`, opacity: layer.isVisible ? `${layer.opacity}%` : 0 }"
       :src="layer.dataUrl"
     />
@@ -33,6 +34,7 @@
       v-for="layer in layers.slice(layerIndex + 1)"
       :style="{ transform: `scale(${canvasScale})`, opacity: layer.isVisible ? `${layer.opacity}%` : 0 }"
       :src="layer.dataUrl"
+      :key="layer.dataUrl"
     />
     <div
       class="canvas absolute top-0 left-0"
@@ -100,6 +102,15 @@ watch(resetEvent, async (val) => {
   if (!canvas.value || !context.value || !overlayCanvas.value || !overlayContext.value || !background.value) return;
   context.value.clearRect(0, 0, canvas.value.width, canvas.value.height);
 
+  layers.value.length = 1;
+  layers.value[0] = {
+    dataUrl: "",
+    isVisible: true,
+    isLocked: false,
+    opacity: 100
+  };
+  layerIndex.value = 0;
+
   history.value = [];
   historyIndex.value = -1;
 
@@ -121,6 +132,28 @@ watch(resetEvent, async (val) => {
 
   await nextTick();
   resetEvent.value = false;
+
+  console.log("yo what's up");
+  if (userStore.lastPastedImage) {
+    console.log("yo what's up 2");
+    const data = await userStore.lastPastedImage.getType("image/png");
+    userStore.lastPastedImage = undefined;
+    if (!data) return;
+
+    const tool = tools.value.select;
+    const image = new Image();
+    image.onload = () => {
+      if (!canvas.value || !context.value) return;
+      tool.selectionRect = [0, 0, image.width, image.height];
+      tool.selectionCanvas = document.createElement("canvas");
+      tool.selectionCanvas.width = image.width;
+      tool.selectionCanvas.height = image.height;
+      tool.selectionCanvas.getContext("2d")!.drawImage(image, 0, 0);
+      tool.selectState = "selected";
+      stampSelection();
+    };
+    image.src = URL.createObjectURL(data);
+  }
 });
 
 function drawLoop() {
@@ -157,6 +190,10 @@ function drawLoop() {
 }
 
 watch(layerIndex, (newIndex) => changeLayer(newIndex));
+watch(
+  () => layers.value.length,
+  () => changeLayer(layerIndex.value)
+);
 function changeLayer(newIndex: number) {
   if (!canvas.value || !context.value) return;
 
@@ -643,7 +680,7 @@ function stampText() {
   context.value.fillStyle = tool.isLeftClick ? currentColor.value.primary : currentColor.value.secondary;
   context.value.textBaseline = "top";
   context.value.textAlign = "left";
-  context.value.fillText(tool.currentText, x, y);
+  context.value.fillText(tool.currentText, x, y - tool.fontSize);
 
   tool.isTyping = false;
   tool.currentText = "";

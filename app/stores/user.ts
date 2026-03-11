@@ -79,6 +79,8 @@ export const useUserStore = defineStore("userStore", () => {
   const redoEvent = ref(false);
   const resetEvent = ref(false);
 
+  const lastPastedImage = ref<ClipboardItem>();
+
   return {
     canvasSize,
     currentColor,
@@ -94,6 +96,7 @@ export const useUserStore = defineStore("userStore", () => {
     redoEvent,
     resetEvent,
     isTransparentUI,
-    isInModiferBar
+    isInModiferBar,
+    lastPastedImage
   };
 });
